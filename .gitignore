@@ -1,0 +1,9 @@
+.idea
+result
+**/.exercism
+c/**/test-framework
+c/**/HELP.md
+c/**/makefile
+c/**/README.md
+c/**/*.s
+c/**/test_*.c

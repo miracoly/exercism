@@ -1,6 +1,5 @@
 #include "clock.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
@@ -8,22 +7,10 @@ typedef struct {
     int minute;
 } clock_raw;
 
-static int clock_get_minute(const clock_t clock) {
-    char m_str[3];
-    memcpy(m_str, clock.text + 3, 2);
-    m_str[2] = '\0';
-    return atoi(m_str);
-}
-
-static int clock_get_hour(const clock_t clock) {
-    char h_str[3];
-    memcpy(h_str, clock.text, 2);
-    h_str[2] = '\0';
-    return atoi(h_str);
-}
-
 static clock_raw clock_get_raw(const clock_t clock) {
-    return (clock_raw) {.hour = clock_get_hour(clock), .minute = clock_get_minute(clock)};
+    int h, m;
+    sscanf(clock.text, "%d:%d", &h, &m);
+    return (clock_raw) {.hour = h, .minute = m};
 }
 
 clock_t clock_create(int hour, int minute) {

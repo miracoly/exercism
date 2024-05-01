@@ -3,15 +3,14 @@
 #include <errno.h>
 
 circular_buffer_t* new_circular_buffer(size_t capacity) {
-    if (!capacity) return (void*) 0;
+    if (!capacity) return NULL;
 
-    buffer_value_t* values = calloc(capacity, sizeof(buffer_value_t));
-    circular_buffer_t* buffer = malloc(sizeof(circular_buffer_t));
-    if (!buffer || !values) return (void*) 0;
+    circular_buffer_t* buffer = calloc(
+            sizeof(circular_buffer_t) + sizeof(buffer_value_t[capacity]), 1);
+    if (!buffer) return NULL;
 
     *buffer = (circular_buffer_t) {
             .capacity= capacity,
-            .values = values
     };
 
     return buffer;
@@ -56,7 +55,6 @@ uint16_t overwrite(circular_buffer_t* buffer, buffer_value_t value) {
 
 void delete_buffer(circular_buffer_t* buffer) {
     if (!buffer) return;
-    free(buffer->values);
     free(buffer);
 }
 

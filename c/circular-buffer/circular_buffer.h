@@ -10,7 +10,7 @@ typedef struct {
     size_t head;
     size_t len;
     size_t capacity;
-    buffer_value_t* values;
+    buffer_value_t values[];
 } circular_buffer_t;
 
 circular_buffer_t* new_circular_buffer(size_t capacity);

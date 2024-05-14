@@ -10,13 +10,13 @@ static int to_dez(char binary) {
 
 int convert(const char* input) {
     if (!input) return INVALID;
-    const size_t len = strlen(input);
     int res = 0;
 
-    for (size_t i = len; i > 0; --i) {
-        const int dez = to_dez(input[i - 1]);
+    for (size_t i = 0; input[i] != '\0'; ++i) {
+        res <<= 1;
+        const int dez = to_dez(input[i]);
         if (dez == INVALID) return INVALID;
-        res += dez == 1 ? pow(2 * dez, len - i) : 0;
+        res += dez;
     }
 
     return res;

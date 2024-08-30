@@ -26,3 +26,8 @@ java/**/*.xml
 
 # tmp
 *.java
+
+x86-64-assembly/**/*.c
+x86-64-assembly/**/.gitignore
+x86-64-assembly/**/Makefile
+x86-64-assembly/**/vendor

@@ -16,23 +16,41 @@ square_root:
     xor eax, edi
     jz .ret_5
 
-    ; if n == 81 return 9
+.n_eq_81_ret_9:
     ; low = r8d
     ; mid = r9d
     ; high = r10d
     xor r8, r8
     xor r9, r9
     xor r10, r10
+    xor rsi, rsi
 
-    mov eax, edi ; high = n / 2 + 1
+    ; high = n / 2 + 1
+    mov eax, edi
     xor rdx, rdx
     mov r10d, 2
     div r10d
     inc eax
     mov r10d, eax
 
-    ; TODO set mid = (low + high) / 2
+    ; mid = (low + high) / 2
+    mov eax, r8d
+    add eax, r10d
+    xor rdx, rdx
+    mov r11d, 2
+    div r11d
+    mov r9d, eax
 
+    ; r11d = mid * mid
+    xor rdx, rdx
+    mov eax, r9d
+    mov r11d, r9d
+    mul r11d
+
+    ; r11d == n return n
+    mov esi, r11d
+    xor esi, edi
+    jz .ret_mid
 
     mov rax, 81
     xor rax, rdi
@@ -49,6 +67,9 @@ square_root:
     jmp .ret
 .ret_9:
     mov eax, 9
+    jmp .ret
+.ret_mid:
+    mov eax, r9d
     jmp .ret
 
 .ret:

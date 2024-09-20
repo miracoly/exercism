@@ -47,6 +47,7 @@ square_root:
     mov eax, r9d
     mov r11d, r9d
     mul r11d
+    mov r11d, eax
 
     ; if (mid^2 (r11d) == n)
     ;   return n

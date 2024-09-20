@@ -33,6 +33,7 @@ square_root:
     inc eax
     mov r10d, eax
 
+.loop:
     ; mid = (low + high) / 2
     mov eax, r8d
     add eax, r10d
@@ -41,20 +42,42 @@ square_root:
     div r11d
     mov r9d, eax
 
-    ; r11d = mid * mid
+    ; r11d = mid^2
     xor rdx, rdx
     mov eax, r9d
     mov r11d, r9d
     mul r11d
 
-    ; r11d == n return n
+    ; if (mid^2 (r11d) == n)
+    ;   return n
     mov esi, r11d
     xor esi, edi
     jz .ret_mid
 
-    mov rax, 81
-    xor rax, rdi
-    jz .ret_9
+    ; if (mid^2 (r11d) < n)
+    ;   jump to .sqrt_larger
+    cmp r11d, edi ; mid^2 - n
+    jl .sqrt_larger ; if true, jump
+
+    ; else (mid^2 (r11d) > n)
+    ;   high = mid - 1
+    mov r10d, r9d
+    sub r10d, 1
+    jmp .check_low_gt_high
+
+.sqrt_larger:
+    ;   low = mid + 1
+    mov r8d, r9d
+    add r8d, 1
+
+.check_low_gt_high:
+    ; if (low > high)
+    ;   then return high
+    cmp r8d, r10d ; low - high
+    jg .ret_high
+
+    ; else rerun loop
+    jmp .loop
 
 .ret_1:
     mov eax, 1
@@ -70,6 +93,9 @@ square_root:
     jmp .ret
 .ret_mid:
     mov eax, r9d
+    jmp .ret
+.ret_high:
+    mov eax, r10d
     jmp .ret
 
 .ret:

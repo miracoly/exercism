@@ -5,6 +5,7 @@ result
 **/.exercism
 c/**/test-framework
 c/**/makefile
+c/**/Makefile
 c/**/README.md
 c/**/*.s
 c/**/test_*.c

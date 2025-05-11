@@ -3,6 +3,7 @@
 compile_commands.json
 result
 *.md
+**/.cache
 
 **/.exercism
 c/**/test-framework

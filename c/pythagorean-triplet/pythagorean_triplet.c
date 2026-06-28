@@ -1,4 +1,5 @@
 #include "pythagorean_triplet.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -15,7 +16,7 @@ typedef struct maybe_triplet_t {
 
 #define MAYBE_IS_SOME(...) ((__VA_ARGS__).has_value)
 
-[[nodiscard]] static maybe_triplet_t calculate(int a, int sum) {
+static maybe_triplet_t calculate(int a, int sum) {
   int dividend = (2 * a * sum) - (sum * sum);
   int divisor = (2 * a - 2 * sum);
   if (dividend % divisor) return MAYBE_NONE;

@@ -7,29 +7,68 @@
 
 #define REACT_INITIAL_CAPACITY 10
 
-enum Cell_Tag { CELL_INPUT, CELL_COMPUTE1, CELL_COMPUTE2 };
+#define CAT_(a, b) a##b
+#define CAT(a, b) CAT_(a, b)
+#define VEC(T) CAT(vector_, T)
+#define VEC_FN(T, m) CAT(VEC(T), CAT(_, m))
 
-struct Input_Cell {
-  int value;
-};
+#define DEFINE_VECTOR(T)                              \
+  typedef struct VEC(T) {                             \
+    size_t length;                                    \
+    size_t capacity;                                  \
+    T* data;                                          \
+  } VEC(T);                                           \
+                                                      \
+  VEC(T) * VEC_FN(T, new)(size_t capacity) {          \
+    VEC(T)* res = malloc(sizeof *res);                \
+    if (!res) return NULL;                            \
+                                                      \
+    res->data = malloc(capacity * sizeof *res->data); \
+    if (!res->data) {                                 \
+      free(res);                                      \
+      return NULL;                                    \
+    }                                                 \
+                                                      \
+    res->capacity = capacity;                         \
+    res->length = 0;                                  \
+    return res;                                       \
+  }                                                   \
+                                                      \
+  void VEC_FN(T, push_back)(VEC(T) * vec, T elem) {   \
+    assert(vec != NULL);                              \
+    assert(elem != NULL);                             \
+                                                      \
+    if (vec->length == vec->capacity) {               \
+    //TODO:                                           \
+    };                                                \
+  }
+
+typedef struct cb {
+  callback_id id;
+  callback fn;
+} cb;
+
+DEFINE_VECTOR(cb)
 
 struct Compute_Cell_1 {
-  int value;
   struct cell* input;
   compute1 fn;
+  size_t cb_count;
 };
 struct Compute_Cell_2 {
-  int value;
   struct cell* input1;
   struct cell* input2;
   compute2 fn;
 };
 
+enum Cell_Tag { CELL_INPUT, CELL_COMPUTE1, CELL_COMPUTE2 };
+
 struct cell {
   enum Cell_Tag tag;
   struct reactor* r;
+  int value;
+  bool changed;
   union {
-    struct Input_Cell ic;
     struct Compute_Cell_1 c1;
     struct Compute_Cell_2 c2;
   } cell;
@@ -78,7 +117,8 @@ struct cell* create_input_cell(struct reactor* r, int initial_value) {
 
   c->tag = CELL_INPUT;
   c->r = r;
-  c->cell.ic.value = initial_value;
+  c->value = initial_value;
+  c->changed = false;
   if (!add_cell(r, c)) {
     free(c);
     return NULL;
@@ -98,9 +138,10 @@ struct cell* create_compute1_cell(struct reactor* r, struct cell* c,
 
   cc->tag = CELL_COMPUTE1;
   cc->r = r;
+  cc->changed = false;
+  cc->value = fn(get_cell_value(c));
   cc->cell.c1.input = c;
   cc->cell.c1.fn = fn;
-  cc->cell.c1.value = fn(get_cell_value(c));
 
   if (!add_cell(r, cc)) {
     free(cc);
@@ -122,10 +163,11 @@ struct cell* create_compute2_cell(struct reactor* r, struct cell* c1,
 
   cc->tag = CELL_COMPUTE2;
   cc->r = r;
+  cc->changed = false;
+  cc->value = fn(get_cell_value(c1), get_cell_value(c2));
   cc->cell.c2.input1 = c1;
   cc->cell.c2.input2 = c2;
   cc->cell.c2.fn = fn;
-  cc->cell.c2.value = fn(get_cell_value(c1), get_cell_value(c2));
 
   if (!add_cell(r, cc)) {
     free(cc);
@@ -137,21 +179,13 @@ struct cell* create_compute2_cell(struct reactor* r, struct cell* c1,
 
 int get_cell_value(struct cell* c) {
   assert(c != NULL);
-  switch (c->tag) {
-    case CELL_INPUT:
-      return c->cell.ic.value;
-    case CELL_COMPUTE1:
-      return c->cell.c1.value;
-    case CELL_COMPUTE2:
-      return c->cell.c2.value;
-  }
-  abort();
+  return c->value;
 }
 
 void set_cell_value(struct cell* c, int new_value) {
   assert(c != NULL);
   assert(c->tag == CELL_INPUT);
-  c->cell.ic.value = new_value;
+  c->value = new_value;
   recompute(c->r);
 }
 
@@ -186,13 +220,13 @@ static void recompute_cell(struct cell* c) {
       return;
     case CELL_COMPUTE1: {
       const int new_in_val = get_cell_value(c->cell.c1.input);
-      c->cell.c1.value = c->cell.c1.fn(new_in_val);
+      c->value = c->cell.c1.fn(new_in_val);
       return;
     }
     case CELL_COMPUTE2: {
       const int new_in_val1 = get_cell_value(c->cell.c2.input1);
       const int new_in_val2 = get_cell_value(c->cell.c2.input2);
-      c->cell.c2.value = c->cell.c2.fn(new_in_val1, new_in_val2);
+      c->value = c->cell.c2.fn(new_in_val1, new_in_val2);
       return;
     }
   }
